@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: payment_data
+    database: deeltakehome-475117 
+    schema: payment_data
+    tables:
+      - name: acceptance_report
+      - name: chargeback_report

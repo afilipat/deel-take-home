@@ -35,5 +35,5 @@ models:
     staging:  # subfolder for staging models
       +materialized: view  # keep staging models as views
 
-    marts:  # subfolder for analytics/aggregate models
+    analytics:  # subfolder for analytics/aggregate models
       +materialized: table  # analytics tables as physical tables, faster for BI queries

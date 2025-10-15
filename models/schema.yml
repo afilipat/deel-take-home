@@ -295,3 +295,29 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
               min_value: 0
               max_value: 100
+
+  - name: high_decline_countries
+    description: A list of countries where the total volume of declined transactions (in USD) exceeded a threshold of $25 Million. Useful for highlighting regions with significant acceptance issues.
+    columns:
+      - name: country
+        data_type: STRING
+        description: The two-letter country code. This serves as the unique identifier.
+        tests:
+          - not_null
+          - unique
+
+      - name: declined_volume_usd
+        data_type: NUMERIC
+        description: The total volume of transactions that were declined in this country (in USD).
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 25000000 # Enforces the business logic
+
+      - name: total_volume_usd
+        data_type: NUMERIC
+        description: The total gross volume (Accepted + Declined) for the country (in USD).
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0

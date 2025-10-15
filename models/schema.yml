@@ -58,23 +58,19 @@ models:
 
       - name: country
         data_type: STRING
-        description: Country where the payment originated (3 char ISO Code).
+        description: Country where the payment originated (2 char ISO Code).
         tests:
           - not_null
-          - dbt_expectations.expect_column_to_match_regex:
-              arguments:
-                # Ensure it's a three-letter currency code
-                regex: '^[A-Z]{3}$'
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: "^[A-Z]{2}$"
 
       - name: currency
         data_type: STRING
         description: Original currency code for the transaction (e.g. EUR, GBP, USD).
         tests:
           - not_null
-          - dbt_expectations.expect_column_to_match_regex:
-              arguments:
-                # Ensure it's a three-letter currency code
-                regex: '^[A-Z]{3}$'
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: "^[A-Z]{3}$"
 
       - name: rates
         data_type: STRING # We should change this to JSON with more time
@@ -178,7 +174,7 @@ models:
     columns:
       - name: country
         data_type: STRING
-        description: The three-letter country code of the payment.
+        description: The two-letter country code of the payment.
 
       - name: total_volume_usd
         data_type: NUMERIC
@@ -227,3 +223,75 @@ models:
         description: Volume-level acceptance rate (Accepted Volume / Total Volume). Value is between 0 and 1.
         tests:
           - not_null
+
+  - name: acceptance_rate_over_time
+    description: Monthly time series of payment acceptance metrics, including total volume, transaction counts, and acceptance rates, calculated in USD.
+    columns:
+      - name: payment_month
+        data_type: DATE
+        description: The month for the aggregation period. This is the primary time dimension.
+        tests:
+          - not_null
+          - unique # Ensure each month appears only once (acting as a primary key)
+
+      - name: total_amount_usd
+        data_type: NUMERIC
+        description: Total aggregated payment volume (Accepted + Declined) for the month, in USD.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: accepted_amount_usd
+        data_type: NUMERIC
+        description: Total USD volume of successfully accepted payments for the month.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: declined_amount_usd
+        data_type: NUMERIC
+        description: Total USD volume of declined payments for the month.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0 
+
+      - name: total_transactions
+        data_type: INT64 # Or BIGINT
+        description: Total count of all payment attempts for the month.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+
+      - name: accepted_transactions
+        data_type: INT64 # Or BIGINT
+        description: Count of successfully accepted transactions.
+        tests:
+          - not_null
+
+      - name: declined_transactions
+        data_type: INT64 # Or BIGINT
+        description: Count of declined transactions.
+        tests:
+          - not_null
+
+      - name: transaction_acceptance_rate
+        data_type: FLOAT64
+        description: Transaction-level acceptance rate. Percentage value (0.00 to 100.00) calculated as (Accepted Transactions / Total Transactions) * 100.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+
+      - name: transaction_declined_rate
+        data_type: FLOAT64
+        description: Transaction-level decline rate. Percentage value (0.00 to 100.00) calculated as (Declined Transactions / Total Transactions) * 100.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100

@@ -8,47 +8,56 @@ models:
     description: Cleaned and standardized version of the acceptance table with additional fields such as amount in USD.
     columns:
       - name: external_ref
+        data_type: STRING
         description: External unique identifier for the payment transaction.
         tests:
           - unique
           - not_null
 
       - name: status
+        data_type: BOOLEAN
         description: Current status of the payment (TRUE, FALSE).
         tests:
           - not_null
 
       - name: source
+        data_type: STRING
         description: System or channel from which the payment originated.
         tests:
           - not_null
 
       - name: ref
+        data_type: STRING
         description: Transaction reference code.
         tests:
           - not_null
 
       - name: date_time
+        data_type: TIMESTAMP
         description: Timestamp when the payment occurred, converted to TIMESTAMP type.
         tests:
           - not_null
 
       - name: state
+        data_type: STRING
         description: Internal state of the payment during processing (ACCEPTED, DECLINED)
         tests:
           - not_null
 
       - name: cvv_provided
+        data_type: BOOLEAN
         description: Indicator if CVV was provided by the customer during the transaction.
         tests:
           - not_null
 
       - name: local_curr_amount
+        data_type: NUMERIC
         description: Payment amount in the original transaction currency.
         tests:
           - not_null
 
       - name: country
+        data_type: STRING
         description: Country where the payment originated (3 char ISO Code).
         tests:
           - not_null
@@ -58,6 +67,7 @@ models:
                 regex: '^[A-Z]{3}$'
 
       - name: currency
+        data_type: STRING
         description: Original currency code for the transaction (e.g. EUR, GBP, USD).
         tests:
           - not_null
@@ -67,11 +77,13 @@ models:
                 regex: '^[A-Z]{3}$'
 
       - name: rates
+        data_type: STRING # We should change this to JSON with more time
         description: JSON string of currency conversion rates where USD=1.
         tests:
           - not_null
 
       - name: amount_usd
+        data_type: NMERIC
         description: Payment amount converted to USD using the rate data in the rates column.
         tests:
           - not_null
@@ -80,22 +92,26 @@ models:
     description: Cleaned and standardized version of the chargeback table.
     columns:
       - name: external_ref
+        data_type: STRING
         description: External unique identifier matching the payment in the acceptance table.
         tests:
           - unique
           - not_null
 
       - name: status
+        data_type: BOOLEAN
         description: Internal state of the processing of the chargeback (TRUE, FALSE).
         tests:
           - not_null
 
       - name: source
+        data_type: STRING
         description: System or channel from which the chargeback originated.
         tests:
           - not_null
 
       - name: chargeback
+        data_type: BOOLEAN
         description: State of whether the chargeback was processed successfuly (TRUE, FALSE).
         tests:
           - not_null
@@ -107,86 +123,107 @@ models:
     description: Combined dataset joining acceptance and chargeback records, including chargeback flag.
     columns:
       - name: external_ref
+        data_type: STRING
         description: Unique payment identifier joining acceptance and chargeback records.
         tests:
           - unique
           - not_null
 
       - name: status
+        data_type: BOOLEAN
         description: Status of the original payment (TRUE, FALSE).
 
       - name: source
+        data_type: STRING
         description: Payment channel or system source.
 
       - name: ref
+        data_type: STRING
         description: Transaction reference code.
 
       - name: date_time
+        data_type: TIMESTAMP
         description: Timestamp of the payment attempt.
 
       - name: state
+        data_type: STRING
         description: Internal payment state (ACCEPTED, DECLINED).
 
       - name: cvv_provided
+        data_type: BOOLEAN
         description: Indicator if CVV was provided during payment.
 
       - name: amount_usd
+        data_type: NUMERIC
         description: Payment amount converted to USD for unified financial reporting.
 
       - name: country
+        data_type: STRING
         description: Country of the payer.
 
       - name: currency
+        data_type: STRING
         description: Original transaction currency.
 
       - name: chargeback_processed
+        data_type: BOOLEAN
         description: State of whether the chargeback was processed successfuly (TRUE, FALSE).
 
       - name: chargeback_accepted
+        data_type: BOOLEAN
         description: Boolean flag indicating if the chargeback was accepted.
 
   - name: acceptance_by_country
     description: Aggregated payment acceptance metrics broken down by country, including total volume, transaction counts, and acceptance rates.
     columns:
       - name: country
+        data_type: STRING
         description: The three-letter country code of the payment.
 
       - name: total_volume_usd
+        data_type: NUMERIC
         description: Total aggregated volume (Accepted + Declined) for the country, in USD.
         tests:
           - not_null
 
       - name: total_transactions
+        data_type: INTEGER
         description: Total count of all transactions (Accepted + Declined) for the country.
         tests:
           - not_null
 
       - name: accepted_transactions
+        data_type: INTEGER
         description: Count of transactions where state was 'ACCEPTED'.
         tests:
           - not_null
 
       - name: accepted_volume_usd
+        data_type: NUMERIC
         description: Total USD volume of transactions where state was 'ACCEPTED'.
         tests:
           - not_null
 
       - name: declined_transactions
+        data_type: INTEGER
         description: Count of transactions where state was 'DECLINED'.
         tests:
           - not_null
 
       - name: declined_volume_usd
+        data_type: NUMERIC
         description: Total USD volume of transactions where state was 'DECLINED'.
         tests:
           - not_null
 
       - name: acceptance_rate
+        data_type: FLOAT
         description: Transaction-level acceptance rate (Accepted Transactions / Total Transactions). Value is between 0 and 1.
         tests:
           - not_null
 
       - name: volume_acceptance_rate
+        data_type: NUMERIC
         description: Volume-level acceptance rate (Accepted Volume / Total Volume). Value is between 0 and 1.
         tests:
           - not_null

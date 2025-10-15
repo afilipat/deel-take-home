@@ -2,8 +2,21 @@ version: 2
 
 sources:
   - name: payment_data
+    description: Raw source tables containing payment acceptance and chargeback data.
     database: deeltakehome-475117 
     schema: payment_data
-    tables:
+    tables: # For each table we should list the not null and accepted values validations
       - name: acceptance_report
+        description: Raw table containing individual payment attempts.
+        columns:
+          - name: external_ref
+            tests:
+              - unique
+              - not_null
       - name: chargeback_report
+        description: Raw table containing chargeback records.
+        columns:
+          - name: external_ref
+            tests:
+              - unique
+              - not_null
